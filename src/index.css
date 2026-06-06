@@ -428,15 +428,15 @@ body {
 @keyframes ci-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* Invitation — flows top-down and scrolls (orb + hint + discover + meta). */
-.ci-invite { justify-content: flex-start; height: auto; min-height: 100%; gap: 18px; padding-bottom: 96px; }
-.ci-invite-copy { padding-top: 20px; }
+.ci-invite { justify-content: flex-start; height: auto; min-height: 100%; gap: 12px; padding-top: 12px; padding-bottom: 88px; }
+.ci-invite-copy { padding-top: 4px; }
 .ci-sub { color: var(--muted); margin-top: 8px; }
 
 /* ElevenLabs Orb host — three.js canvas. Reacts to ambient mic on mount. */
 .ci-orb-btn {
   position: relative;
-  width: 280px;
-  height: 280px;
+  width: 168px;
+  height: 168px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -802,14 +802,14 @@ body {
 
 /* "Tap the orb to record" hint under the check-in orb. */
 .ci-orb-hint {
-  margin-top: 14px;
+  margin-top: 2px;
   color: var(--muted);
   text-align: center;
   opacity: 0.9;
 }
 
 /* ─── Discover (AI vibe search + carousel) ─────────────────────── */
-.discover { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+.discover { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; }
 .discover-search {
   display: flex; align-items: center; gap: 8px;
   background: rgba(21, 21, 31, 0.8);
@@ -849,10 +849,10 @@ body {
 }
 .discover-carousel::-webkit-scrollbar { display: none; }
 .disc-card {
-  flex: 0 0 78%; max-width: 280px; scroll-snap-align: start;
+  flex: 0 0 76%; max-width: 270px; scroll-snap-align: start;
   text-align: left; cursor: pointer;
-  display: flex; flex-direction: column; gap: 8px;
-  padding: 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 12px 14px;
   border: 1px solid #26263a;
   border-left: 4px solid var(--heat, #26263a);
   border-radius: var(--r-card);
@@ -873,7 +873,10 @@ body {
 .disc-time { font-size: 12px; color: var(--muted); }
 .disc-name { line-height: 1.1; }
 .disc-tier { letter-spacing: 0.06em; }
-.disc-summary { font-size: 14px; color: var(--text); opacity: 0.92; margin: 0; }
+.disc-summary {
+  font-size: 14px; color: var(--text); opacity: 0.92; margin: 0;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
 .disc-reason { color: var(--muted); font-style: italic; }
 
 /* Inspect sheet (tap a carousel card) */
