@@ -1,5 +1,13 @@
 import { env, flags } from './env'
 
+// ElevenLabs Sound Effects caps the prompt at 450 chars. Trim at a word boundary.
+function capText(s: string, max = 450): string {
+  if (s.length <= max) return s
+  const cut = s.slice(0, max)
+  const lastSpace = cut.lastIndexOf(' ')
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trim()
+}
+
 /**
  * The "Vibe Narrator": turn a vibe summary into spoken audio in a persona voice.
  * Uses ElevenLabs flash model for low latency. Returns an MP3 buffer.
@@ -44,7 +52,7 @@ export async function soundEffect(prompt: string, durationSeconds = 20): Promise
       Accept: 'audio/mpeg',
     },
     body: JSON.stringify({
-      text: prompt,
+      text: capText(prompt, 450),
       duration_seconds: Math.max(0.5, Math.min(22, durationSeconds)),
       prompt_influence: 0.5, // lean toward the described scene over model improv
     }),
@@ -72,7 +80,9 @@ export async function soundscape(prompt: string, durationSeconds = 22): Promise<
       Accept: 'audio/mpeg',
     },
     body: JSON.stringify({
-      text: prompt,
+      // Sound Effects caps text at 450 chars — trim at a word boundary so a long
+      // forecast prompt still generates instead of 400-ing into the fallback.
+      text: capText(prompt, 450),
       model_id: 'eleven_text_to_sound_v2', // required for looping
       loop: true,
       duration_seconds: Math.max(0.5, Math.min(30, durationSeconds)),

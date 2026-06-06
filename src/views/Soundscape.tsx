@@ -47,9 +47,28 @@ export function Soundscape({ vibes }: { vibes: Vibe[]; center?: { lat: number; l
     setData(null)
     resetAudio()
     forecast(place, time)
-      .then((r) => { if (!cancelled) setData(r) })
-      .catch((e) => { if (!cancelled) setError(e?.message ?? 'forecast failed') })
-      .finally(() => { if (!cancelled) setLoading(false) })
+      .then(async (r) => {
+        if (cancelled) return
+        setData(r)
+        setLoading(false)
+        // Prefetch the soundscape (generation takes a few seconds) so the tap
+        // plays instantly AND synchronously — required for iOS autoplay rules.
+        setLoadingAudio(true)
+        try {
+          const sp = r.forecast.future_soundscape_prompt
+          const mood = moodForScore(r.forecast.future_atmosphere.energy_score).key
+          const url = await soundscapeUrl(sp.audio_generation_prompt, mood, `${r.place_name}|${r.target_time}`)
+          if (cancelled || !audioRef.current) { URL.revokeObjectURL(url); return }
+          urlRef.current = url
+          audioRef.current.src = url
+          audioRef.current.loop = true
+        } catch {
+          /* tap will lazily fetch as a fallback */
+        } finally {
+          if (!cancelled) setLoadingAudio(false)
+        }
+      })
+      .catch((e) => { if (!cancelled) { setError(e?.message ?? 'forecast failed'); setLoading(false) } })
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [place, time])
@@ -61,30 +80,30 @@ export function Soundscape({ vibes }: { vibes: Vibe[]; center?: { lat: number; l
     const a = audioRef.current
     if (!a) return
     if (playing) return stopAudio()
-    if (!urlRef.current) {
-      setLoadingAudio(true)
-      try {
-        const sp = data.forecast.future_soundscape_prompt
-        const mood = moodForScore(data.forecast.future_atmosphere.energy_score).key
-        const url = await soundscapeUrl(sp.audio_generation_prompt, mood, `${data.place_name}|${data.target_time}`)
-        urlRef.current = url
-        a.src = url
-      } catch {
-        setError('soundscape unavailable')
-        setLoadingAudio(false)
-        return
-      }
-      setLoadingAudio(false)
+
+    // Prefetched → play synchronously within the gesture (works on iOS).
+    if (urlRef.current) {
+      a.loop = true
+      try { await a.play(); setPlaying(true) } catch { setPlaying(false) }
+      return
     }
-    a.loop = true
+
+    // Not ready yet — fetch then play (fallback for an early tap).
+    setLoadingAudio(true)
     try {
-      await a.play()
-      setPlaying(true)
+      const sp = data.forecast.future_soundscape_prompt
+      const mood = moodForScore(data.forecast.future_atmosphere.energy_score).key
+      const url = await soundscapeUrl(sp.audio_generation_prompt, mood, `${data.place_name}|${data.target_time}`)
+      urlRef.current = url
+      a.src = url
+      a.loop = true
     } catch {
-      // iOS Safari can block play() right after an async fetch (the gesture is
-      // "spent"). The URL is cached now, so tapping again plays synchronously.
-      setPlaying(false)
+      setError('soundscape unavailable')
+      setLoadingAudio(false)
+      return
     }
+    setLoadingAudio(false)
+    try { await a.play(); setPlaying(true) } catch { setPlaying(false) }
   }
 
   const f = data?.forecast
