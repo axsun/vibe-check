@@ -1,36 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import type { DiscoverEvent } from '../../shared/types'
 import { discover } from '../lib/api'
 import { moodFor } from '../lib/mood'
-
-/** Plays the first ~5s of an event clip, then auto-stops. */
-function DiscSample({ url }: { url: string }) {
-  const ref = useRef<HTMLAudioElement | null>(null)
-  const timer = useRef<number | undefined>(undefined)
-  const [playing, setPlaying] = useState(false)
-  useEffect(() => () => window.clearTimeout(timer.current), [])
-  function stop() {
-    const a = ref.current
-    if (a) { a.pause(); a.currentTime = 0 }
-    window.clearTimeout(timer.current)
-    setPlaying(false)
-  }
-  function toggle() {
-    const a = ref.current
-    if (!a) return
-    if (playing) return stop()
-    a.currentTime = 0
-    void a.play()
-    setPlaying(true)
-    timer.current = window.setTimeout(stop, 5000)
-  }
-  return (
-    <div className="vibe-sample">
-      <audio ref={ref} src={url} preload="none" onEnded={stop} />
-      <button className="vibe-sample-btn" onClick={toggle}>{playing ? '⏹ Stop' : '▶ 5s sample'}</button>
-    </div>
-  )
-}
+import { ClipSample } from './ClipSample'
 
 function InspectSheet({ ev, onClose }: { ev: DiscoverEvent; onClose: () => void }) {
   const mood = moodFor(ev)
@@ -53,7 +25,7 @@ function InspectSheet({ ev, onClose }: { ev: DiscoverEvent; onClose: () => void 
           {ev.music_genre && <span className="emoji-tag">{ev.music_genre}</span>}
           <span className="emoji-tag">{ev.emotional_register}</span>
         </div>
-        {ev.clip_url && <DiscSample url={ev.clip_url} />}
+        {ev.clip_url && <ClipSample url={ev.clip_url} />}
         {ev.lat != null && ev.lng != null && (
           <button className="cta-take-me" onClick={takeMeThere}>Take me there</button>
         )}

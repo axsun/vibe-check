@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   APIProvider,
   Map,
@@ -9,6 +9,7 @@ import type { Vibe } from '../../shared/types'
 import { DEMO_CENTER } from '../../shared/seed-data'
 import { isFriend } from '../../shared/friends'
 import { moodFor, moodGlow } from '../lib/mood'
+import { ClipSample } from './ClipSample'
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 const MAP_ID = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'
@@ -42,41 +43,6 @@ function VibePin({ vibe }: { vibe: LatLngVibe }) {
       }}
       title={`${vibe.place_name} · ${mood.label}`}
     />
-  )
-}
-
-/** Plays the first ~5s of a vibe clip, then auto-stops. */
-function VibeSample({ url }: { url: string }) {
-  const ref = useRef<HTMLAudioElement | null>(null)
-  const timer = useRef<number | undefined>(undefined)
-  const [playing, setPlaying] = useState(false)
-
-  useEffect(() => () => window.clearTimeout(timer.current), [])
-
-  function stop() {
-    const a = ref.current
-    if (a) { a.pause(); a.currentTime = 0 }
-    window.clearTimeout(timer.current)
-    setPlaying(false)
-  }
-
-  function toggle() {
-    const a = ref.current
-    if (!a) return
-    if (playing) return stop()
-    a.currentTime = 0
-    void a.play()
-    setPlaying(true)
-    timer.current = window.setTimeout(stop, 5000)
-  }
-
-  return (
-    <div className="vibe-sample">
-      <audio ref={ref} src={url} preload="none" onEnded={stop} />
-      <button className="vibe-sample-btn" onClick={toggle}>
-        {playing ? '⏹ Stop' : '▶ 5s sample'}
-      </button>
-    </div>
   )
 }
 
@@ -137,7 +103,7 @@ export function MapView({ vibes, center }: { vibes: Vibe[]; center?: { lat: numb
               <strong>{open.place_name}</strong> <span className="mood-word">{moodFor(open).label}</span>
               <br />
               {open.summary}
-              {open.clip_url && <VibeSample url={open.clip_url} />}
+              {open.clip_url && <ClipSample url={open.clip_url} />}
             </div>
           </InfoWindow>
         )}
