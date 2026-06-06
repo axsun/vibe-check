@@ -65,14 +65,15 @@ export async function soundEffect(prompt: string, durationSeconds = 20): Promise
 }
 
 /**
- * Generate a seamless, LOOPING ambient soundscape for an Atmosphere Forecast —
- * a cinematic bed (not a song). Uses the v2 text-to-sound model with loop=true.
- * Returns an MP3 buffer to drop into an <audio loop>. Throws if no key.
+ * Generate the Atmosphere Forecast soundscape via the ElevenLabs Music API
+ * (POST /v1/music). The forecast's scene description is shaped into an
+ * instrumental music brief (no vocals) so it reads as a cohesive atmosphere bed.
+ * Returns an MP3 buffer; the player loops it via <audio loop>. Throws if no key.
  */
-export async function soundscape(prompt: string, durationSeconds = 22): Promise<Buffer> {
+export async function soundscape(prompt: string, lengthMs = 22000): Promise<Buffer> {
   if (!flags.elevenlabs) throw new Error('ElevenLabs not configured (set ELEVENLABS_API_KEY)')
 
-  const res = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
+  const res = await fetch('https://api.elevenlabs.io/v1/music', {
     method: 'POST',
     headers: {
       'xi-api-key': env.ELEVENLABS_API_KEY,
@@ -80,18 +81,14 @@ export async function soundscape(prompt: string, durationSeconds = 22): Promise<
       Accept: 'audio/mpeg',
     },
     body: JSON.stringify({
-      // Sound Effects caps text at 450 chars — trim at a word boundary so a long
-      // forecast prompt still generates instead of 400-ing into the fallback.
-      text: capText(prompt, 450),
-      model_id: 'eleven_text_to_sound_v2', // required for looping
-      loop: true,
-      duration_seconds: Math.max(0.5, Math.min(30, durationSeconds)),
-      prompt_influence: 0.3,
+      // Shape the forecast's scene into an instrumental music brief (no vocals).
+      prompt: capText(`Instrumental atmosphere music, no vocals, loopable ambient bed. Scene: ${prompt}`, 1800),
+      music_length_ms: Math.max(10000, Math.min(60000, lengthMs)),
     }),
   })
 
   if (!res.ok) {
-    throw new Error(`ElevenLabs soundscape ${res.status}: ${(await res.text()).slice(0, 300)}`)
+    throw new Error(`ElevenLabs music ${res.status}: ${(await res.text()).slice(0, 300)}`)
   }
   return Buffer.from(await res.arrayBuffer())
 }
