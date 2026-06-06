@@ -17,7 +17,7 @@ Return EXACTLY these fields (no extras, no markdown, no commentary):
 
 Guidance:
 - Distinguish music from talking. A room can be loud from chatter with no music, or loud from music with no talking.
-- has_lyrics: true only if you actually hear sung words. Instrumental house/techno = false.
+- has_lyrics: true only if you actually hear sung words. 
 - emotional_register: "dead" = empty/awkward, "chill" = relaxed/low-key, "lively" = busy & fun, "hyped" = peak energy.
 - summary: be concrete and a little funny. Bad: "It is loud here." Good: "Techno's pounding, nobody's talking, everyone's pretending to dance."
 - If you genuinely can't tell, make your single best guess. Never return null for required non-nullable fields.

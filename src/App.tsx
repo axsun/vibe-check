@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react'
 import type { Vibe } from '../shared/types'
 import { getFeed } from './lib/api'
 import { getLocation } from './lib/geo'
-import { MapView } from './components/MapView'
 import { Feed } from './components/Feed'
 import { CheckIn } from './views/CheckIn'
 
-type Tab = 'map' | 'checkin' | 'feed'
+type View = 'feed' | 'checkin'
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>('map')
+  const [view, setView] = useState<View>('feed')
   const [vibes, setVibes] = useState<Vibe[]>([])
   const [center, setCenter] = useState<{ lat: number; lng: number } | undefined>()
 
@@ -23,7 +22,7 @@ export default function App() {
 
   function onPosted(v: Vibe) {
     setVibes((prev) => [v, ...prev])
-    setTab('feed')
+    setView('feed')
   }
 
   return (
@@ -34,15 +33,34 @@ export default function App() {
       </header>
 
       <main className="content">
-        {tab === 'map' && <MapView vibes={vibes} center={center} />}
-        {tab === 'checkin' && <CheckIn onPosted={onPosted} />}
-        {tab === 'feed' && <Feed vibes={vibes} />}
+        {view === 'feed' && <Feed vibes={vibes} center={center} />}
+        {view === 'checkin' && <CheckIn onPosted={onPosted} />}
       </main>
 
-      <nav className="tabbar">
-        <button className={tab === 'map' ? 'on' : ''} onClick={() => setTab('map')}>🗺️ Map</button>
-        <button className={tab === 'checkin' ? 'on' : ''} onClick={() => setTab('checkin')}>🎙️ Check in</button>
-        <button className={tab === 'feed' ? 'on' : ''} onClick={() => { setTab('feed'); refresh() }}>📰 Feed</button>
+      <nav className="dock">
+        <button
+          className={`dock-btn ${view === 'feed' ? 'on' : ''}`}
+          onClick={() => setView('feed')}
+        >
+          <span className="dock-glyph">📰</span>
+          <span className="dock-label">Feed</span>
+        </button>
+
+        <button
+          className="dock-orb"
+          onClick={() => setView('checkin')}
+          aria-label="Check in"
+        >
+          <span className="dock-orb-inner">🎙️</span>
+        </button>
+
+        <button
+          className={`dock-btn ${view === 'checkin' ? 'on' : ''}`}
+          onClick={() => setView('checkin')}
+        >
+          <span className="dock-glyph">✨</span>
+          <span className="dock-label">Check in</span>
+        </button>
       </nav>
     </div>
   )

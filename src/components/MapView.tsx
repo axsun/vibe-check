@@ -1,35 +1,76 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+import { useMemo } from 'react'
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps'
 import type { Vibe } from '../../shared/types'
 import { DEMO_CENTER } from '../../shared/seed-data'
+import { isFriend } from '../../shared/friends'
+import { heatFor } from '../lib/heat'
 
-// Fix Leaflet's default marker icons under a bundler (otherwise they 404).
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
+const MAP_ID = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'
+const FRESH_MS = 10 * 60 * 1000
 
-L.Icon.Default.mergeOptions({ iconUrl: markerIcon, iconRetinaUrl: markerIcon2x, shadowUrl: markerShadow })
+function isFresh(iso: string): boolean {
+  const t = Date.parse(iso)
+  if (Number.isNaN(t)) return false
+  return Date.now() - t < FRESH_MS
+}
+
+function VibePin({ vibe }: { vibe: Vibe }) {
+  const heat = heatFor(vibe.popping_score)
+  const friend = isFriend(vibe.handle)
+  const fresh = isFresh(vibe.created_at)
+  const size = 14 + Math.round((vibe.popping_score / 100) * 14) // 14–28px
+
+  return (
+    <div
+      className={`vibe-pin ${fresh ? 'fresh' : ''} ${friend ? 'friend' : ''}`}
+      style={{
+        width: size,
+        height: size,
+        background: heat.color,
+        boxShadow: `0 0 ${Math.round(size * 0.9)}px ${heat.color}aa, 0 0 4px rgba(0,0,0,0.6)`,
+      }}
+      title={`${vibe.place_name} · ${vibe.popping_score}`}
+    />
+  )
+}
 
 export function MapView({ vibes, center }: { vibes: Vibe[]; center?: { lat: number; lng: number } }) {
   const c = center ?? DEMO_CENTER
-  const pins = vibes.filter((v) => v.lat != null && v.lng != null)
+  const pins = useMemo(() => vibes.filter((v) => v.lat != null && v.lng != null), [vibes])
+
+  if (!API_KEY) {
+    return (
+      <div className="map-empty">
+        <div className="map-empty-glow" />
+        <div className="map-empty-copy">
+          <div className="t-h2">Map unlocked when key lands</div>
+          <p className="t-small">
+            Set <code>VITE_GOOGLE_MAPS_API_KEY</code> in <code>.env</code> to light up the city.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <MapContainer center={[c.lat, c.lng]} zoom={14} className="map">
-      <TileLayer
-        attribution='&copy; OpenStreetMap'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {pins.map((v) => (
-        <Marker key={v.id} position={[v.lat!, v.lng!]}>
-          <Popup>
-            <strong>{v.place_name}</strong> · {v.popping_score}/100
-            <br />
-            {v.summary}
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+    <APIProvider apiKey={API_KEY}>
+      <Map
+        mapId={MAP_ID}
+        defaultCenter={c}
+        defaultZoom={15}
+        gestureHandling="greedy"
+        disableDefaultUI
+        clickableIcons={false}
+        colorScheme="DARK"
+        className="map"
+      >
+        {pins.map((v) => (
+          <AdvancedMarker key={v.id} position={{ lat: v.lat!, lng: v.lng! }}>
+            <VibePin vibe={v} />
+          </AdvancedMarker>
+        ))}
+      </Map>
+    </APIProvider>
   )
 }

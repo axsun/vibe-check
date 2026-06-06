@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(npx vite *)",
+      "WebFetch(domain:ui.elevenlabs.io)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(curl -s https://ui.elevenlabs.io/docs/components/orb -A \"Mozilla/5.0\")",
+      "Bash(gh search *)",
+      "Bash(gh api *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); paths=[t['path'] for t in d.get\\('tree',[]\\) if 'orb' in t['path'].lower\\(\\)]; print\\('\\\\n'.join\\(paths\\)\\)\")",
+      "Read(//tmp/**)",
+      "Bash(cp /tmp/orb-src.tsx /Users/alanna.sun/claude-project/vibe-check/src/components/Orb.tsx && head -10 /Users/alanna.sun/claude-project/vibe-check/src/components/Orb.tsx)",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./package.json'\\).dependencies, null, 2\\)\\)\")",
+      "Bash(npm ls *)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp"
+    ]
+  }
+}
