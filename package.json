@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "setup": "tsx scripts/setup.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "generate-vibes": "tsx scripts/generate-vibes.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

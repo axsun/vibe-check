@@ -27,3 +27,31 @@ export async function narrate(text: string, voiceId = env.ELEVENLABS_VOICE_ID): 
   }
   return Buffer.from(await res.arrayBuffer())
 }
+
+/**
+ * Generate an ambient venue soundscape from a text prompt via ElevenLabs Sound
+ * Effects (text-to-sound). Returns an MP3 buffer that can be fed straight into the
+ * same analyzer pipeline a real recording uses. Max ~22s per the API.
+ */
+export async function soundEffect(prompt: string, durationSeconds = 20): Promise<Buffer> {
+  if (!flags.elevenlabs) throw new Error('ElevenLabs not configured (set ELEVENLABS_API_KEY)')
+
+  const res = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
+    method: 'POST',
+    headers: {
+      'xi-api-key': env.ELEVENLABS_API_KEY,
+      'Content-Type': 'application/json',
+      Accept: 'audio/mpeg',
+    },
+    body: JSON.stringify({
+      text: prompt,
+      duration_seconds: Math.max(0.5, Math.min(22, durationSeconds)),
+      prompt_influence: 0.5, // lean toward the described scene over model improv
+    }),
+  })
+
+  if (!res.ok) {
+    throw new Error(`ElevenLabs sound-generation ${res.status}: ${(await res.text()).slice(0, 300)}`)
+  }
+  return Buffer.from(await res.arrayBuffer())
+}
