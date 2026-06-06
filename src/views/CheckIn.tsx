@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Vibe } from '../../shared/types'
 import { startRecording, type Recording } from '../lib/recorder'
 import { getLocation } from '../lib/geo'
+import { checkIn } from '../lib/api'
 import { mockVibeFromLevels } from '../lib/mockVibe'
 import { useAmbientMic } from '../lib/ambientMic'
 import { Orb, type AgentState } from '../components/Orb'
@@ -117,18 +118,30 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
       getLocation(),
     ])
 
-    const elapsed = performance.now() - startedAtRef.current
-    const minWait = elapsed < CLIP_SECONDS * 1000 ? READING_MS : Math.max(900, READING_MS)
-    await new Promise((r) => setTimeout(r, minWait))
-
-    const v = mockVibeFromLevels({
-      levels: capturedLevelsRef.current,
+    const input = {
       place_name: placeName.trim() || 'My spot',
       handle: handle.trim() || '🙂 anon',
       lat: loc?.lat ?? null,
       lng: loc?.lng ?? null,
-      clipBlob: blob,
-    })
+    }
+
+    // Keep the "reading the room" animation up for at least READING_MS, but let the
+    // real analysis take as long as it needs — the two run in parallel.
+    const minWait = new Promise((r) => setTimeout(r, READING_MS))
+
+    let v: Vibe
+    try {
+      // Real analysis: upload the clip to /api/vibe → transcode → Gemini → score.
+      const [real] = await Promise.all([checkIn(blob, input), minWait])
+      v = real
+    } catch (err) {
+      // Graceful fallback: if the analyzer is down/quota'd, derive a vibe from the
+      // captured mic levels so the check-in still completes.
+      console.warn('[check-in] real analysis failed, using local estimate:', err)
+      await minWait
+      v = mockVibeFromLevels({ levels: capturedLevelsRef.current, ...input, clipBlob: blob })
+    }
+
     setVibe(v)
     setPhase('reveal')
   }
