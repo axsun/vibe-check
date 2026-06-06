@@ -34,7 +34,8 @@ export async function analyzeVibe(clip: Buffer): Promise<VibeDimensions> {
 
   const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY)
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    // 2.5-flash has quota on this project (2.0-flash is capped at free-tier limit 0)
+    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
     generationConfig: { responseMimeType: 'application/json', responseSchema: responseSchema as any },
   })
 
