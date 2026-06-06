@@ -31,6 +31,9 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
   const sampleRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startedAtRef = useRef(0)
   const capturedLevelsRef = useRef<number[]>([])
+  // Drives the orb's loop speed during analysis (read every frame by the Orb):
+  // high while Gemini works → fast looping animation; drops to idle when done.
+  const orbOutRef = useRef(0)
 
   const agentState: AgentState = phase === 'listening' ? 'listening' : phase === 'reading' ? 'thinking' : null
 
@@ -111,6 +114,7 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
     if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null }
     if (sampleRef.current) { clearInterval(sampleRef.current); sampleRef.current = null }
     if (!recRef.current) return
+    orbOutRef.current = 0.85 // spin the orb up into an active "thinking" loop
     setPhase('reading')
 
     const [{ blob }, loc] = await Promise.all([
@@ -125,8 +129,8 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
       lng: loc?.lng ?? null,
     }
 
-    // Keep the "reading the room" animation up for at least READING_MS, but let the
-    // real analysis take as long as it needs — the two run in parallel.
+    // Keep the orb looping for at least READING_MS, but let the real analysis take
+    // as long as it needs — the orb keeps animating for the whole duration.
     const minWait = new Promise((r) => setTimeout(r, READING_MS))
 
     let v: Vibe
@@ -141,6 +145,10 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
       await minWait
       v = mockVibeFromLevels({ levels: capturedLevelsRef.current, ...input, clipBlob: blob })
     }
+
+    // Analysis complete → let the orb wind down to idle, then reveal.
+    orbOutRef.current = 0.3
+    await new Promise((r) => setTimeout(r, 700))
 
     setVibe(v)
     setPhase('reveal')
@@ -170,6 +178,16 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
   if (phase === 'reading') {
     return (
       <div className="ci-stage ci-reading">
+        <div className="ci-reading-orb">
+          <Orb
+            colors={ORB_BASE}
+            colorsRef={colorsRef}
+            agentState="thinking"
+            volumeMode="manual"
+            inputVolumeRef={mic.levelRef}
+            outputVolumeRef={orbOutRef}
+          />
+        </div>
         <ReadingRoom />
       </div>
     )

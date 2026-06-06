@@ -466,15 +466,18 @@ body {
   -webkit-text-fill-color: var(--muted);
 }
 
-/* Reading-the-room: orb sits behind, slightly larger, blurred in periphery */
-.ci-orb-bg {
-  position: absolute;
+/* Reading-the-room: orb stays centered and loops while the analysis runs. */
+.ci-reading-orb {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  flex: 0 0 auto;
+}
+.ci-reading-orb > div:first-child {
+  position: absolute !important;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  opacity: 0.85;
-  pointer-events: none;
+  width: 100% !important;
+  height: 100% !important;
 }
 .ci-reading > .reading-room { position: relative; z-index: 1; }
 
