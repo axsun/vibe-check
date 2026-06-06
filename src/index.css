@@ -67,18 +67,22 @@ body {
 /* ── App shell ────────────────────────────────────────────────── */
 .app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; position: relative; }
 
-/* Topbar = wordmark + a floating glass "island" segmented nav. */
-.topbar {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 14px 16px 10px;
-}
-.wordmark { color: var(--muted); letter-spacing: 0.12em; }
+/* Topbar = just the wordmark; the nav lives in a floating bottom island. */
+.topbar { display: flex; align-items: baseline; justify-content: center; gap: 10px; padding: 16px 16px 10px; }
+.brand { font-family: var(--font-mono); font-weight: 700; font-size: 24px; letter-spacing: 0.02em; color: var(--ink); }
+.tagline { color: var(--muted); letter-spacing: 0.1em; }
+
+/* Floating glass "island" segmented nav. */
 .island {
-  display: flex; gap: 2px; max-width: 100%; padding: 4px;
+  display: flex; gap: 2px; padding: 4px;
   border-radius: var(--r-pill);
   background: var(--glass); border: 1px solid var(--edge);
   backdrop-filter: blur(var(--blur)) saturate(1.3); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.3);
-  box-shadow: inset 0 1px 0 var(--specular), 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 0 var(--specular), 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.island-bottom {
+  position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50;
+  max-width: calc(100% - 24px);
 }
 .island-seg {
   border: none; background: transparent; cursor: pointer; white-space: nowrap;
@@ -91,7 +95,7 @@ body {
 .island-seg:active { transform: scale(0.96); }
 
 /* ── Soundscape (Atmosphere Forecast) ─────────────────────────── */
-.ss-stage { display: flex; flex-direction: column; gap: 14px; padding: 8px 16px 32px; }
+.ss-stage { display: flex; flex-direction: column; gap: 14px; padding: 8px 16px 104px; }
 .ss-selectors { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; z-index: 2; padding-bottom: 4px; background: linear-gradient(180deg, var(--bg) 70%, transparent); }
 .ss-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
 .ss-chips::-webkit-scrollbar { display: none; }
@@ -249,7 +253,7 @@ body {
 }
 .lens-btn.on { background: var(--glass-3); color: var(--ink); }
 
-.feed { flex: 1; overflow-y: auto; padding: 4px 16px 24px; display: flex; flex-direction: column; gap: 14px; }
+.feed { flex: 1; overflow-y: auto; padding: 4px 16px 96px; display: flex; flex-direction: column; gap: 14px; }
 .feed-map { flex: 1; position: relative; overflow: hidden; }
 .empty { color: var(--muted); text-align: center; padding: 56px 24px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; }
 
@@ -393,15 +397,17 @@ body {
   border: 1px solid var(--edge);
   box-shadow: inset 0 1px 0 var(--specular), 0 0 60px color-mix(in srgb, var(--mood) 30%, transparent), 0 16px 40px rgba(0, 0, 0, 0.5);
 }
-/* mood word is the hero (no prominent number) */
-.reveal-tier { font-size: 13px; color: var(--mood); text-shadow: 0 0 18px color-mix(in srgb, var(--mood) 80%, transparent); }
-.reveal-aura {
-  font-family: var(--font-body); font-weight: 600; font-size: 38px; letter-spacing: -0.5px; line-height: 1;
-  color: var(--ink); text-shadow: 0 0 28px color-mix(in srgb, var(--mood) 60%, transparent);
+/* The aura: a mood-color orb + a mono mood word, with the place name as hero. */
+.reveal-orb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--mood);
+  box-shadow: 0 0 24px var(--mood), 0 0 8px var(--mood);
+  margin-bottom: 2px;
 }
-.reveal-score-wrap, .reveal-score, .reveal-score-suffix, .reveal-score-chip { display: none; }
-.reveal-place { color: var(--ink); }
-.reveal-summary { font-size: 16px; line-height: 1.5; color: var(--ink); opacity: 0.92; margin: 0; }
+.reveal-mood { color: var(--mood); letter-spacing: 0.18em; text-shadow: 0 0 14px color-mix(in srgb, var(--mood) 70%, transparent); }
+.reveal-tier, .reveal-aura, .reveal-score-wrap, .reveal-score, .reveal-score-suffix, .reveal-score-chip { display: none; }
+.reveal-place { color: var(--ink); font-size: 34px; line-height: 1.05; }
+.reveal-summary { font-size: 17px; line-height: 1.5; color: var(--ink); opacity: 0.9; margin: 0; }
 .reveal-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .reveal-tag {
   font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
@@ -428,7 +434,7 @@ body {
 @keyframes ci-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* Centered vertically; falls back to top-anchored scroll if content is tall. */
-.ci-invite { justify-content: safe center; height: auto; min-height: 100%; gap: 16px; padding-top: 24px; padding-bottom: 32px; }
+.ci-invite { justify-content: safe center; height: auto; min-height: 100%; gap: 16px; padding-top: 24px; padding-bottom: 108px; }
 .ci-invite-copy { padding-top: 4px; }
 .ci-invite-copy .t-display-l { color: var(--ink); }
 

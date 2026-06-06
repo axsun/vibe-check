@@ -35,18 +35,8 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="wordmark t-micro">VIBE&nbsp;CHECK · read the aura</div>
-        <nav className="island">
-          {VIEWS.map((v) => (
-            <button
-              key={v.key}
-              className={`island-seg ${view === v.key ? 'on' : ''}`}
-              onClick={() => setView(v.key)}
-            >
-              {v.label}
-            </button>
-          ))}
-        </nav>
+        <span className="brand">ki</span>
+        <span className="tagline t-micro">read the aura</span>
       </header>
 
       <main className="content">
@@ -54,6 +44,18 @@ export default function App() {
         {view === 'checkin' && <CheckIn onPosted={onPosted} />}
         {view === 'soundscape' && <Soundscape vibes={vibes} center={center} />}
       </main>
+
+      <nav className="island island-bottom">
+        {VIEWS.map((v) => (
+          <button
+            key={v.key}
+            className={`island-seg ${view === v.key ? 'on' : ''}`}
+            onClick={() => setView(v.key)}
+          >
+            {v.label}
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }

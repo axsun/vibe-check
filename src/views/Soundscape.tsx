@@ -77,8 +77,14 @@ export function Soundscape({ vibes }: { vibes: Vibe[]; center?: { lat: number; l
       setLoadingAudio(false)
     }
     a.loop = true
-    void a.play()
-    setPlaying(true)
+    try {
+      await a.play()
+      setPlaying(true)
+    } catch {
+      // iOS Safari can block play() right after an async fetch (the gesture is
+      // "spent"). The URL is cached now, so tapping again plays synchronously.
+      setPlaying(false)
+    }
   }
 
   const f = data?.forecast
