@@ -16,7 +16,21 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; }
+.app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; position: relative; }
+
+/* Floating "create a vibe" pill, above the tab bar on Map/Feed. */
+.fab {
+  position: absolute; right: 18px; bottom: 76px; z-index: 1000;
+  height: 48px; padding: 0 18px; border-radius: 24px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 15px; font-weight: 700; line-height: 1;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s ease;
+}
+.fab-plus { font-size: 22px; }
+.fab:hover { transform: scale(1.05); }
+.fab:active { transform: scale(0.95); }
 
 .topbar {
   display: flex; align-items: baseline; gap: 10px; padding: 14px 18px;

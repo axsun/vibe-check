@@ -39,6 +39,12 @@ export default function App() {
         {tab === 'feed' && <Feed vibes={vibes} />}
       </main>
 
+      {tab !== 'checkin' && (
+        <button className="fab" aria-label="Create a vibe" title="Create a vibe" onClick={() => setTab('checkin')}>
+          <span className="fab-plus">＋</span> Add a vibe
+        </button>
+      )}
+
       <nav className="tabbar">
         <button className={tab === 'map' ? 'on' : ''} onClick={() => setTab('map')}>🗺️ Map</button>
         <button className={tab === 'checkin' ? 'on' : ''} onClick={() => setTab('checkin')}>🎙️ Check in</button>
