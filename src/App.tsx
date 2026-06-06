@@ -4,8 +4,15 @@ import { getFeed } from './lib/api'
 import { getLocation } from './lib/geo'
 import { Feed } from './components/Feed'
 import { CheckIn } from './views/CheckIn'
+import { Soundscape } from './views/Soundscape'
 
-type View = 'feed' | 'checkin'
+type View = 'checkin' | 'feed' | 'soundscape'
+
+const VIEWS: { key: View; label: string }[] = [
+  { key: 'checkin', label: 'RECORD' },
+  { key: 'feed', label: 'FEED' },
+  { key: 'soundscape', label: 'SOUNDSCAPE' },
+]
 
 export default function App() {
   const [view, setView] = useState<View>('checkin')
@@ -28,19 +35,24 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <h1>Vibe&nbsp;Check</h1>
-        <span className="tagline">read the aura</span>
-        <button
-          className="nav-link"
-          onClick={() => setView(view === 'feed' ? 'checkin' : 'feed')}
-        >
-          {view === 'feed' ? 'record →' : 'feed →'}
-        </button>
+        <div className="wordmark t-micro">VIBE&nbsp;CHECK · read the aura</div>
+        <nav className="island">
+          {VIEWS.map((v) => (
+            <button
+              key={v.key}
+              className={`island-seg ${view === v.key ? 'on' : ''}`}
+              onClick={() => setView(v.key)}
+            >
+              {v.label}
+            </button>
+          ))}
+        </nav>
       </header>
 
       <main className="content">
         {view === 'feed' && <Feed vibes={vibes} center={center} />}
         {view === 'checkin' && <CheckIn onPosted={onPosted} />}
+        {view === 'soundscape' && <Soundscape vibes={vibes} center={center} />}
       </main>
     </div>
   )

@@ -63,3 +63,19 @@ export interface DiscoverResponse {
   query: string
   events: DiscoverEvent[]
 }
+
+/** Future Atmosphere Preview — what a place will FEEL like at a future moment. */
+export interface AtmosphereForecast {
+  future_atmosphere: { energy_score: number; energy_label: string; trajectory: string; confidence: number }
+  crowd_profile: { primary_archetypes: string[]; social_behavior: string; group_dynamics: string }
+  atmosphere_summary: { headline: string; description: string }
+  environmental_cues: { lighting: string; movement: string; conversation_density: string; dominant_mood: string }
+  sound_profile: { music_presence: string; genre_influences: string[]; volume_level: string; crowd_noise_level: string; signature_sounds: string[] }
+  future_soundscape_prompt: { title: string; description: string; audio_generation_prompt: string }
+}
+
+export interface ForecastResponse {
+  place_name: string
+  target_time: string
+  forecast: AtmosphereForecast
+}

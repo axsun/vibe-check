@@ -1,4 +1,4 @@
-import type { Vibe, VibeCheckInput, DiscoverResponse } from '../../shared/types'
+import type { Vibe, VibeCheckInput, DiscoverResponse, ForecastResponse } from '../../shared/types'
 
 export async function getFeed(lat?: number, lng?: number, radiusKm = 5): Promise<Vibe[]> {
   const q = new URLSearchParams()
@@ -39,6 +39,28 @@ export async function discover(q: string): Promise<DiscoverResponse> {
   const res = await fetch(`/api/discover?q=${encodeURIComponent(q)}`)
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'discovery failed')
   return res.json()
+}
+
+/** Forecast a place's future atmosphere at a target time. */
+export async function forecast(place_name: string, target_time: string, location?: string): Promise<ForecastResponse> {
+  const res = await fetch('/api/forecast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ place_name, target_time, location }),
+  })
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'forecast failed')
+  return res.json()
+}
+
+/** Generate/fetch the looping ambient soundscape for a forecast. Returns a playable URL. */
+export async function soundscapeUrl(prompt: string, mood: string, cacheKey: string): Promise<string> {
+  const res = await fetch('/api/soundscape', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt, mood, cacheKey }),
+  })
+  if (!res.ok) throw new Error('soundscape unavailable')
+  return URL.createObjectURL(await res.blob())
 }
 
 /** Vibe Narrator: speak a summary aloud (ElevenLabs). Returns a playable audio URL. */

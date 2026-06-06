@@ -44,6 +44,15 @@ export function moodFor(v: MoodInput): Mood {
   return MOODS.chill
 }
 
+/** Derive a mood from a 0–100 energy score (for forecasts, where we only have energy). */
+export function moodForScore(score: number): Mood {
+  if (score >= 82) return MOODS.party
+  if (score >= 64) return MOODS.electric
+  if (score >= 44) return MOODS.buzzy
+  if (score >= 26) return MOODS.chill
+  return MOODS.still
+}
+
 /**
  * Energy → glow size in px. Energy reads as glow intensity/size, not a digit.
  * `score` is the 0–100 popping signal; larger/brighter glow = more energy.

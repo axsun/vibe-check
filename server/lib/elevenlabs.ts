@@ -55,3 +55,33 @@ export async function soundEffect(prompt: string, durationSeconds = 20): Promise
   }
   return Buffer.from(await res.arrayBuffer())
 }
+
+/**
+ * Generate a seamless, LOOPING ambient soundscape for an Atmosphere Forecast —
+ * a cinematic bed (not a song). Uses the v2 text-to-sound model with loop=true.
+ * Returns an MP3 buffer to drop into an <audio loop>. Throws if no key.
+ */
+export async function soundscape(prompt: string, durationSeconds = 22): Promise<Buffer> {
+  if (!flags.elevenlabs) throw new Error('ElevenLabs not configured (set ELEVENLABS_API_KEY)')
+
+  const res = await fetch('https://api.elevenlabs.io/v1/sound-generation', {
+    method: 'POST',
+    headers: {
+      'xi-api-key': env.ELEVENLABS_API_KEY,
+      'Content-Type': 'application/json',
+      Accept: 'audio/mpeg',
+    },
+    body: JSON.stringify({
+      text: prompt,
+      model_id: 'eleven_text_to_sound_v2', // required for looping
+      loop: true,
+      duration_seconds: Math.max(0.5, Math.min(30, durationSeconds)),
+      prompt_influence: 0.3,
+    }),
+  })
+
+  if (!res.ok) {
+    throw new Error(`ElevenLabs soundscape ${res.status}: ${(await res.text()).slice(0, 300)}`)
+  }
+  return Buffer.from(await res.arrayBuffer())
+}
