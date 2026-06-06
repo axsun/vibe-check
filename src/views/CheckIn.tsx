@@ -8,6 +8,7 @@ import { useAmbientMic } from '../lib/ambientMic'
 import { Orb, type AgentState } from '../components/Orb'
 import { ReadingRoom } from '../components/ReadingRoom'
 import { VibeReveal } from '../components/VibeReveal'
+import { Discover } from '../components/Discover'
 import { heatFor } from '../lib/heat'
 
 const CLIP_SECONDS = 20
@@ -197,17 +198,6 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
     <div className="ci-stage ci-invite">
       <div className="ci-invite-copy">
         <div className="t-display-l">What's the vibe?</div>
-        <div className="t-small ci-sub">
-          {phase === 'listening'
-            ? 'listening in…'
-            : mic.status === 'live'
-              ? 'tap when you\'re ready — 20 seconds'
-              : mic.status === 'requesting'
-                ? 'asking for the mic…'
-                : mic.status === 'denied'
-                  ? 'mic denied — allow it in site settings to feel the room'
-                  : '20 seconds. let the room speak.'}
-        </div>
         {phase === 'listening' && (
           <div className="ci-countdown t-display-l" aria-live="polite">
             {Math.ceil(remaining)}<span className="ci-countdown-unit">s</span>
@@ -233,6 +223,8 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
       {phase !== 'listening' && (
         <div className="ci-orb-hint t-small">👆 Tap the orb to record · 20s</div>
       )}
+
+      {phase !== 'listening' && <Discover />}
 
       <div className="ci-invite-meta">
         <input

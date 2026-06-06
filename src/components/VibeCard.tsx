@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Vibe } from '../../shared/types'
-import { heatFor, heatGlow } from '../lib/heat'
+import { heatFor } from '../lib/heat'
 import { vibeTags } from '../lib/vibeTags'
 import { freshnessLabel, formatDistance } from '../lib/distance'
 import { friendsAt, isFriend } from '../../shared/friends'
@@ -62,6 +62,7 @@ export function VibeCard({ vibe, distanceKm, onSelect, expanded }: Props) {
   return (
     <div
       className={`card vibe-card ${friend ? 'is-friend' : ''} ${open ? 'is-open' : ''}`}
+      style={{ ['--heat' as string]: heat.color }}
       onClick={toggle}
       role="button"
     >
@@ -80,23 +81,14 @@ export function VibeCard({ vibe, distanceKm, onSelect, expanded }: Props) {
             )}
           </div>
         </div>
-        <div
-          className="score-chip"
-          style={{ background: heat.color, boxShadow: heatGlow(vibe.popping_score, 14) }}
-        >
-          <span className="score-chip-num">{vibe.popping_score}</span>
-          <span className="score-chip-fire">🔥</span>
-        </div>
+        <span className="vibe-tier t-micro" style={{ color: heat.color }}>{heat.label}</span>
       </div>
 
       <p className="summary">"{vibe.summary}"</p>
 
       <div className="emoji-tags">
         {tags.map((t) => (
-          <span key={t.key} className="emoji-tag">
-            <span className="emoji-tag-emoji">{t.emoji}</span>
-            {t.label}
-          </span>
+          <span key={t.key} className="emoji-tag">{t.label}</span>
         ))}
       </div>
 

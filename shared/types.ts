@@ -41,3 +41,25 @@ export interface NarrateRequest {
   text: string
   voiceId?: string
 }
+
+/** A discovery result from GET /api/discover — a venue popping now, or an upcoming event. */
+export interface DiscoverEvent {
+  id: string
+  name: string
+  when: string // "now", "tonight 10pm", "Fri 9pm"…
+  kind: 'now' | 'soon'
+  match_reason: string
+  summary: string
+  popping_score: number
+  music_genre: string | null
+  emotional_register: string
+  place_name: string
+  lat: number | null
+  lng: number | null
+  clip_url: string | null
+}
+
+export interface DiscoverResponse {
+  query: string
+  events: DiscoverEvent[]
+}

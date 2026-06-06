@@ -6,6 +6,7 @@ import { seedIfEmpty } from './lib/store'
 import { vibeRouter } from './routes/vibe'
 import { feedRouter } from './routes/feed'
 import { narrateRouter } from './routes/narrate'
+import { discoverRouter } from './routes/discover'
 
 const app = express()
 app.use(cors())
@@ -15,6 +16,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, flags }))
 app.use('/api/vibe', vibeRouter)
 app.use('/api/feed', feedRouter)
 app.use('/api/narrate', narrateRouter)
+app.use('/api/discover', discoverRouter)
 
 // Serve locally-stored clips (local storage mode). Proxied via Vite at /clips.
 app.use('/clips', express.static(CLIPS_DIR))

@@ -22,23 +22,32 @@ function isFresh(iso: string): boolean {
   return Date.now() - t < FRESH_MS
 }
 
+// Emoji by popping tier — quick read on the map.
+function pinEmoji(score: number): string {
+  if (score >= 80) return '🔥'
+  if (score >= 60) return '🥳'
+  if (score >= 40) return '😎'
+  if (score >= 20) return '😴'
+  return '💀'
+}
+
 function VibePin({ vibe }: { vibe: LatLngVibe }) {
   const heat = heatFor(vibe.popping_score)
   const friend = isFriend(vibe.handle)
   const fresh = isFresh(vibe.created_at)
-  const size = 14 + Math.round((vibe.popping_score / 100) * 14)
 
   return (
     <div
       className={`vibe-pin ${fresh ? 'fresh' : ''} ${friend ? 'friend' : ''}`}
       style={{
-        width: size,
-        height: size,
         background: heat.color,
-        boxShadow: `0 0 ${Math.round(size * 0.9)}px ${heat.color}aa, 0 0 4px rgba(0,0,0,0.6)`,
+        boxShadow: `0 0 12px ${heat.color}aa, 0 0 4px rgba(0,0,0,0.6)`,
       }}
       title={`${vibe.place_name} · ${vibe.popping_score}`}
-    />
+    >
+      <span className="vibe-pin-emoji">{pinEmoji(vibe.popping_score)}</span>
+      <span className="vibe-pin-score">{vibe.popping_score}</span>
+    </div>
   )
 }
 

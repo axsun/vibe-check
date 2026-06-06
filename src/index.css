@@ -244,8 +244,12 @@ body {
 
 /* ─── Vibe Card ────────────────────────────────────────────────── */
 .vibe-card {
-  background: linear-gradient(180deg, rgba(29, 29, 43, 0.85), rgba(21, 21, 31, 0.9));
+  /* Card color conveys the vibe: a wash of the heat color over the base panel. */
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--heat, transparent) 26%, transparent), color-mix(in srgb, var(--heat, transparent) 7%, transparent) 72%),
+    linear-gradient(180deg, rgba(29, 29, 43, 0.9), rgba(21, 21, 31, 0.95));
   border: 1px solid #26263a;
+  border-left: 4px solid var(--heat, #26263a);
   border-radius: var(--r-card);
   padding: 16px;
   display: flex;
@@ -255,6 +259,7 @@ body {
   cursor: pointer;
   transition: transform 180ms ease-out, border-color 180ms ease-out;
 }
+.vibe-tier { letter-spacing: 0.06em; white-space: nowrap; padding-top: 2px; }
 .vibe-card:active { transform: scale(0.985); }
 .vibe-card.is-friend {
   border-color: rgba(255, 200, 97, 0.35);
@@ -421,9 +426,9 @@ body {
 }
 @keyframes ci-fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* Invitation */
-.ci-invite { justify-content: space-between; }
-.ci-invite-copy { padding-top: 24px; }
+/* Invitation — flows top-down and scrolls (orb + hint + discover + meta). */
+.ci-invite { justify-content: flex-start; height: auto; min-height: 100%; gap: 18px; padding-bottom: 96px; }
+.ci-invite-copy { padding-top: 20px; }
 .ci-sub { color: var(--muted); margin-top: 8px; }
 
 /* ElevenLabs Orb host — three.js canvas. Reacts to ambient mic on mount. */
@@ -698,11 +703,21 @@ body {
 /* ─── Map ────────────────────────────────────────────────────── */
 
 .vibe-pin {
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 999px;
   border: 2px solid rgba(11, 11, 18, 0.85);
   transform: translate(-50%, -50%);
   position: relative;
+  color: #fff;
+  font: 700 12px var(--font-body), system-ui, sans-serif;
+  line-height: 1;
+  white-space: nowrap;
 }
+.vibe-pin-emoji { font-size: 13px; }
+.vibe-pin-score { font-variant-numeric: tabular-nums; }
 .vibe-pin.friend {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
@@ -710,10 +725,9 @@ body {
 .vibe-pin.fresh::after {
   content: '';
   position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  color: inherit;
+  inset: -5px;
+  border-radius: 999px;
+  border: 2px solid #fff;
   animation: pin-pulse 1.6s ease-out infinite;
   pointer-events: none;
 }
@@ -792,3 +806,101 @@ body {
   text-align: center;
   opacity: 0.9;
 }
+
+/* ─── Discover (AI vibe search + carousel) ─────────────────────── */
+.discover { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px; }
+.discover-search {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(21, 21, 31, 0.8);
+  border: 1px solid #2a2a3e;
+  border-radius: var(--r-pill);
+  padding: 6px 8px 6px 14px;
+}
+.discover-search:focus-within { border-color: var(--accent); }
+.discover-icon { font-size: 14px; opacity: 0.8; }
+.discover-input {
+  flex: 1; min-width: 0;
+  background: transparent; border: none; outline: none;
+  color: var(--text); font-family: var(--font-body); font-size: 14px;
+}
+.discover-input::placeholder { color: var(--muted); }
+.discover-mic {
+  border: none; background: transparent; cursor: pointer;
+  font-size: 16px; padding: 6px; border-radius: 50%; line-height: 1;
+}
+.discover-mic.on { background: var(--accent); animation: disc-pulse 1.2s ease-out infinite; }
+@keyframes disc-pulse { 0% { box-shadow: 0 0 0 0 rgba(194,71,255,0.5); } 100% { box-shadow: 0 0 0 10px rgba(194,71,255,0); } }
+.discover-go {
+  border: none; cursor: pointer;
+  background: var(--vibe-gradient); color: #fff;
+  font: 700 13px var(--font-body), system-ui, sans-serif;
+  padding: 8px 14px; border-radius: var(--r-pill);
+}
+.discover-go:disabled { opacity: 0.45; cursor: default; }
+.discover-error { color: #ff8585; text-align: left; }
+.discover-loading, .discover-empty { color: var(--muted); text-align: left; }
+
+.discover-carousel {
+  display: flex; gap: 12px;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  padding: 2px 2px 8px; margin: 0 -2px;
+  scrollbar-width: none;
+}
+.discover-carousel::-webkit-scrollbar { display: none; }
+.disc-card {
+  flex: 0 0 78%; max-width: 280px; scroll-snap-align: start;
+  text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px;
+  border: 1px solid #26263a;
+  border-left: 4px solid var(--heat, #26263a);
+  border-radius: var(--r-card);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--heat, transparent) 28%, transparent), color-mix(in srgb, var(--heat, transparent) 8%, transparent) 70%),
+    linear-gradient(180deg, rgba(29, 29, 43, 0.92), rgba(21, 21, 31, 0.96));
+  color: var(--text);
+  transition: transform 160ms ease-out;
+}
+.disc-card:active { transform: scale(0.98); }
+.disc-when { display: flex; align-items: center; gap: 8px; }
+.disc-kind {
+  font: 700 10px var(--font-body), system-ui, sans-serif;
+  letter-spacing: 0.08em; padding: 2px 7px; border-radius: var(--r-pill);
+}
+.disc-kind.now { background: var(--heat, #6E5BFF); color: #fff; }
+.disc-kind.soon { background: transparent; color: var(--muted); border: 1px solid #3a3a52; }
+.disc-time { font-size: 12px; color: var(--muted); }
+.disc-name { line-height: 1.1; }
+.disc-tier { letter-spacing: 0.06em; }
+.disc-summary { font-size: 14px; color: var(--text); opacity: 0.92; margin: 0; }
+.disc-reason { color: var(--muted); font-style: italic; }
+
+/* Inspect sheet (tap a carousel card) */
+.inspect-backdrop {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(7, 7, 12, 0.72);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: ci-fade-in 180ms ease-out;
+}
+.inspect-sheet {
+  position: relative;
+  width: 100%; max-width: 540px;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 28px 22px 32px;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  border-top: 3px solid var(--heat, var(--accent));
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--heat, transparent) 22%, transparent), transparent 60%),
+    var(--panel);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+.inspect-close {
+  position: absolute; top: 12px; right: 14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: var(--panel2); color: var(--muted);
+  font-size: 20px; line-height: 1;
+}
+.inspect-name { line-height: 1.05; }
+.inspect-summary { font-size: 16px; line-height: 1.45; margin: 0; }

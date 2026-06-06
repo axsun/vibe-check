@@ -54,13 +54,7 @@ export default function App() {
           <span className="dock-orb-inner">🎙️</span>
         </button>
 
-        <button
-          className={`dock-btn ${view === 'checkin' ? 'on' : ''}`}
-          onClick={() => setView('checkin')}
-        >
-          <span className="dock-glyph">✨</span>
-          <span className="dock-label">Check in</span>
-        </button>
+        <span className="dock-spacer" aria-hidden="true" />
       </nav>
     </div>
   )

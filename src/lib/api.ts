@@ -1,4 +1,4 @@
-import type { Vibe, VibeCheckInput } from '../../shared/types'
+import type { Vibe, VibeCheckInput, DiscoverResponse } from '../../shared/types'
 
 export async function getFeed(lat?: number, lng?: number, radiusKm = 5): Promise<Vibe[]> {
   const q = new URLSearchParams()
@@ -23,6 +23,13 @@ export async function checkIn(clip: Blob, input: VibeCheckInput): Promise<Vibe> 
 
   const res = await fetch('/api/vibe', { method: 'POST', body: fd })
   if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'check-in failed')
+  return res.json()
+}
+
+/** Discover venues/events from a natural-language vibe query. */
+export async function discover(q: string): Promise<DiscoverResponse> {
+  const res = await fetch(`/api/discover?q=${encodeURIComponent(q)}`)
+  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? 'discovery failed')
   return res.json()
 }
 
