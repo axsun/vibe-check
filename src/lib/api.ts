@@ -26,6 +26,14 @@ export async function checkIn(clip: Blob, input: VibeCheckInput): Promise<Vibe> 
   return res.json()
 }
 
+/** Reverse-geocode a location to a place name (general area when loc is null). */
+export async function geocode(loc?: { lat: number; lng: number } | null): Promise<{ place: string; precise: boolean }> {
+  const q = loc ? `?lat=${loc.lat}&lng=${loc.lng}` : ''
+  const res = await fetch(`/api/geocode${q}`)
+  if (!res.ok) throw new Error('geocode failed')
+  return res.json()
+}
+
 /** Discover venues/events from a natural-language vibe query. */
 export async function discover(q: string): Promise<DiscoverResponse> {
   const res = await fetch(`/api/discover?q=${encodeURIComponent(q)}`)

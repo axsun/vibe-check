@@ -7,6 +7,7 @@ import { vibeRouter } from './routes/vibe'
 import { feedRouter } from './routes/feed'
 import { narrateRouter } from './routes/narrate'
 import { discoverRouter } from './routes/discover'
+import { geocodeRouter } from './routes/geocode'
 
 const app = express()
 app.use(cors())
@@ -17,6 +18,7 @@ app.use('/api/vibe', vibeRouter)
 app.use('/api/feed', feedRouter)
 app.use('/api/narrate', narrateRouter)
 app.use('/api/discover', discoverRouter)
+app.use('/api/geocode', geocodeRouter)
 
 // Serve locally-stored clips (local storage mode). Proxied via Vite at /clips.
 app.use('/clips', express.static(CLIPS_DIR))

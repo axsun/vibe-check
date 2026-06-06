@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Vibe } from '../../shared/types'
 import { startRecording, type Recording } from '../lib/recorder'
 import { getLocation } from '../lib/geo'
-import { checkIn } from '../lib/api'
+import { checkIn, geocode } from '../lib/api'
 import { mockVibeFromLevels } from '../lib/mockVibe'
 import { useAmbientMic } from '../lib/ambientMic'
 import { Orb, type AgentState } from '../components/Orb'
@@ -35,6 +35,8 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
   // Drives the orb's loop speed during analysis (read every frame by the Orb):
   // high while Gemini works → fast looping animation; drops to idle when done.
   const orbOutRef = useRef(0)
+  // Once the user edits the place field, stop auto-filling it.
+  const placeTouched = useRef(false)
 
   const agentState: AgentState = phase === 'listening' ? 'listening' : phase === 'reading' ? 'thinking' : null
 
@@ -65,6 +67,21 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
     if (tickRef.current) clearInterval(tickRef.current)
     if (sampleRef.current) clearInterval(sampleRef.current)
     recRef.current?.cancel()
+  }, [])
+
+  // Pre-fill "Where are you?" from the user's location (precise if granted,
+  // general area otherwise). Stops if the user has already typed something.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const loc = await getLocation()
+      if (cancelled || placeTouched.current) return
+      try {
+        const { place } = await geocode(loc)
+        if (!cancelled && !placeTouched.current && place) setPlaceName(place)
+      } catch { /* leave blank — recording falls back to "My spot" */ }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   async function startListening() {
@@ -231,7 +248,7 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
           className="ci-meta-input"
           placeholder="Where are you?"
           value={placeName}
-          onChange={(e) => setPlaceName(e.target.value)}
+          onChange={(e) => { placeTouched.current = true; setPlaceName(e.target.value) }}
         />
         <input
           className="ci-meta-input"

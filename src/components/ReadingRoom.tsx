@@ -9,13 +9,9 @@ export function ReadingRoom() {
     return () => clearInterval(t)
   }, [])
 
+  // Just the status line now — the orb is the only visual while analyzing.
   return (
     <div className="reading-room">
-      <div className="rr-rings">
-        <span className="rr-ring rr-r1" />
-        <span className="rr-ring rr-r2" />
-        <span className="rr-ring rr-r3" />
-      </div>
       <div className="rr-copy t-h2">{COPY[i]}</div>
     </div>
   )
