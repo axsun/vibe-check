@@ -52,8 +52,8 @@ const SEEDS: Seed[] = [
     dims: { loudness: 5, music_present: false, music_volume: null, music_genre: null, has_lyrics: null, talk_level: 6, emotional_register: "lively", summary: "The room's abuzz with chatter and clinking glasses, like a busy cafe catching up on the day's gossip." },
   },
   {
-    place_name: "Warehouse (EDM)", handle: "🔊 raver", dLat: 0.0042, dLng: 0.0031, clip: '/seed-clips/warehouse-edm.mp3', 
-    dims: { loudness: 5, music_present: true, music_volume: 5, music_genre: "Ambient Electronic", has_lyrics: false, talk_level: 0, emotional_register: "dead", summary: "An unsettling electronic drone fills what feels like an empty, echoing industrial space." },
+    place_name: "Warehouse (EDM)", handle: "🔊 raver", dLat: 0.0042, dLng: 0.0031, clip: '/seed-clips/warehouse-edm.mp3',
+    dims: { loudness: 10, music_present: true, music_volume: 10, music_genre: "techno", has_lyrics: false, talk_level: 3, emotional_register: "hyped", summary: "Relentless 128-BPM techno, zero lyrics, a packed floor that hasn't stopped moving." },
   },
   {
     place_name: "Blue Note", handle: "🎷 milesfan", dLat: 0.0029, dLng: -0.0041, clip: '/seed-clips/blue-note.mp3', 
