@@ -1,11 +1,10 @@
-import { randomUUID } from 'node:crypto'
 import type { Vibe } from '../../shared/types'
-import { makeSeedVibes } from '../../shared/seed-data'
 import { env, flags } from './env'
 import { supabase } from './supabase'
+import { localList, localInsert, localSaveClip, localSeedIfEmpty, localReseed } from './localStore'
 
-// ── In-memory fallback (no Supabase keys): full app works, just not persisted ──
-const memory: Vibe[] = makeSeedVibes()
+// Storage dispatcher. Default = local files (data/). Set STORAGE_MODE=supabase to
+// use Supabase (kept fully working behind the flag so switching back is one env var).
 
 function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
   const R = 6371
@@ -36,7 +35,7 @@ export async function listVibes(q: FeedQuery = {}): Promise<Vibe[]> {
     if (error) throw error
     rows = (data ?? []) as Vibe[]
   } else {
-    rows = [...memory].sort((a, b) => b.created_at.localeCompare(a.created_at))
+    rows = (await localList()).sort((a, b) => b.created_at.localeCompare(a.created_at))
   }
 
   if (q.lat != null && q.lng != null) {
@@ -48,24 +47,34 @@ export async function listVibes(q: FeedQuery = {}): Promise<Vibe[]> {
   return rows
 }
 
-/** Upload a clip to Supabase Storage and return its public URL (null in mock mode). */
+/** Save a clip and return a playable URL (Supabase public URL or local /clips path). */
 export async function uploadClip(buffer: Buffer, contentType: string): Promise<string | null> {
-  if (!(flags.supabase && supabase)) return null
-  const ext = contentType.includes('mp4') ? 'm4a' : contentType.includes('webm') ? 'webm' : 'audio'
-  const path = `${randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from(env.SUPABASE_BUCKET).upload(path, buffer, { contentType })
-  if (error) throw error
-  return supabase.storage.from(env.SUPABASE_BUCKET).getPublicUrl(path).data.publicUrl
+  if (flags.supabase && supabase) {
+    const { randomUUID } = await import('node:crypto')
+    const ext = contentType.includes('mp4') ? 'm4a' : contentType.includes('webm') ? 'webm' : 'audio'
+    const path = `${randomUUID()}.${ext}`
+    const { error } = await supabase.storage.from(env.SUPABASE_BUCKET).upload(path, buffer, { contentType })
+    if (error) throw error
+    return supabase.storage.from(env.SUPABASE_BUCKET).getPublicUrl(path).data.publicUrl
+  }
+  return localSaveClip(buffer, contentType)
 }
 
-/** Persist a vibe (Supabase) or push into memory (mock). Returns the stored row. */
+/** Persist a vibe. Returns the stored row. */
 export async function insertVibe(vibe: Omit<Vibe, 'id' | 'created_at'>): Promise<Vibe> {
   if (flags.supabase && supabase) {
     const { data, error } = await supabase.from('vibes').insert(vibe).select().single()
     if (error) throw error
     return data as Vibe
   }
-  const row: Vibe = { ...vibe, id: randomUUID(), created_at: new Date().toISOString() }
-  memory.unshift(row)
-  return row
+  return localInsert(vibe)
 }
+
+/** Seed starter data if empty (local mode only; Supabase uses `npm run seed`). */
+export async function seedIfEmpty(): Promise<void> {
+  if (flags.supabase) return
+  const n = await localSeedIfEmpty()
+  console.log(`   • seeded:     ${n} starter vibes in data/vibes.json`)
+}
+
+export { localReseed }

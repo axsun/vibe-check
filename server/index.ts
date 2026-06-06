@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import { env, flags, logStartup } from './lib/env'
+import { CLIPS_DIR } from './lib/localStore'
+import { seedIfEmpty } from './lib/store'
 import { vibeRouter } from './routes/vibe'
 import { feedRouter } from './routes/feed'
 import { narrateRouter } from './routes/narrate'
@@ -14,7 +16,11 @@ app.use('/api/vibe', vibeRouter)
 app.use('/api/feed', feedRouter)
 app.use('/api/narrate', narrateRouter)
 
-app.listen(env.PORT, () => {
+// Serve locally-stored clips (local storage mode). Proxied via Vite at /clips.
+app.use('/clips', express.static(CLIPS_DIR))
+
+app.listen(env.PORT, async () => {
   logStartup()
+  await seedIfEmpty()
   console.log(`   • listening:  http://localhost:${env.PORT}`)
 })
