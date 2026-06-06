@@ -8,7 +8,7 @@ import { CheckIn } from './views/CheckIn'
 type View = 'feed' | 'checkin'
 
 export default function App() {
-  const [view, setView] = useState<View>('feed')
+  const [view, setView] = useState<View>('checkin')
   const [vibes, setVibes] = useState<Vibe[]>([])
   const [center, setCenter] = useState<{ lat: number; lng: number } | undefined>()
 
@@ -30,32 +30,18 @@ export default function App() {
       <header className="topbar">
         <h1>Vibe&nbsp;Check</h1>
         <span className="tagline">read the aura</span>
+        <button
+          className="nav-link"
+          onClick={() => setView(view === 'feed' ? 'checkin' : 'feed')}
+        >
+          {view === 'feed' ? 'record →' : 'feed →'}
+        </button>
       </header>
 
       <main className="content">
         {view === 'feed' && <Feed vibes={vibes} center={center} />}
         {view === 'checkin' && <CheckIn onPosted={onPosted} />}
       </main>
-
-      <nav className="dock">
-        <button
-          className={`dock-btn ${view === 'feed' ? 'on' : ''}`}
-          onClick={() => setView('feed')}
-        >
-          <span className="dock-glyph">📰</span>
-          <span className="dock-label">Feed</span>
-        </button>
-
-        <button
-          className="dock-orb"
-          onClick={() => setView('checkin')}
-          aria-label="Check in"
-        >
-          <span className="dock-orb-inner">🎙️</span>
-        </button>
-
-        <span className="dock-spacer" aria-hidden="true" />
-      </nav>
     </div>
   )
 }
