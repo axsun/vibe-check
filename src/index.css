@@ -853,12 +853,13 @@ body {
   text-align: left; cursor: pointer;
   display: flex; flex-direction: column; gap: 6px;
   padding: 12px 14px;
-  border: 1px solid #26263a;
-  border-left: 4px solid var(--heat, #26263a);
+  /* Matches the feed card: soft heat-color glow from the top-right, no side bar. */
+  border: 1px solid color-mix(in srgb, var(--heat, #26263a) 28%, #26263a);
   border-radius: var(--r-card);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--heat, transparent) 28%, transparent), color-mix(in srgb, var(--heat, transparent) 8%, transparent) 70%),
-    linear-gradient(180deg, rgba(29, 29, 43, 0.92), rgba(21, 21, 31, 0.96));
+    radial-gradient(120% 130% at 100% 0%, color-mix(in srgb, var(--heat, transparent) 32%, transparent), transparent 52%),
+    linear-gradient(150deg, color-mix(in srgb, var(--heat, transparent) 12%, transparent), transparent 55%),
+    linear-gradient(180deg, #1e1e2c, #16161f);
   color: var(--text);
   transition: transform 160ms ease-out;
 }
