@@ -170,16 +170,6 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
   if (phase === 'reading') {
     return (
       <div className="ci-stage ci-reading">
-        <div className="ci-orb-bg">
-          <Orb
-            colors={ORB_BASE}
-            colorsRef={colorsRef}
-            agentState="thinking"
-            volumeMode="manual"
-            inputVolumeRef={mic.levelRef}
-            manualOutput={0.6}
-          />
-        </div>
         <ReadingRoom />
       </div>
     )
@@ -221,6 +211,10 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
           manualOutput={phase === 'listening' ? 0.7 : 0.35}
         />
       </button>
+
+      {phase !== 'listening' && (
+        <div className="ci-orb-hint t-small">👆 Tap the orb to record · 20s</div>
+      )}
 
       <div className="ci-invite-meta">
         <input

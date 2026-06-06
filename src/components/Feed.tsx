@@ -8,6 +8,10 @@ import { isFriend, friendsAt } from '../../shared/friends'
 type Filter = 'all' | 'lively' | 'chill' | 'lyrics' | 'genre'
 type Lens = 'feed' | 'map'
 
+// A vibe checked in within this window floats to the top so a fresh post is
+// always visible immediately (even when geolocation is unavailable).
+const FRESH_MS = 10 * 60 * 1000
+
 interface Props {
   vibes: Vibe[]
   center?: { lat: number; lng: number }
@@ -43,14 +47,20 @@ export function Feed({ vibes, center }: Props) {
 
   const ranked = useMemo(() => {
     const filtered = applySearch(applyFilter(vibes, filter), query)
+    const now = Date.now()
     const withDist = filtered.map((v) => {
       const dist = center && v.lat != null && v.lng != null
         ? kmBetween(center, { lat: v.lat, lng: v.lng })
         : null
-      return { v, dist, friendly: isFriend(v.handle) || friendsAt(v.place_name).length > 0 }
+      const created = Date.parse(v.created_at)
+      const fresh = !Number.isNaN(created) && now - created < FRESH_MS
+      return { v, dist, created, fresh, friendly: isFriend(v.handle) || friendsAt(v.place_name).length > 0 }
     })
-    // Friends first (taste), then by proximity ascending (null distance last).
+    // Just-posted vibes first (newest → oldest), then friends (taste), then by
+    // proximity ascending (null distance last).
     withDist.sort((a, b) => {
+      if (a.fresh !== b.fresh) return a.fresh ? -1 : 1
+      if (a.fresh && b.fresh) return b.created - a.created
       if (a.friendly !== b.friendly) return a.friendly ? -1 : 1
       const ad = a.dist ?? Infinity
       const bd = b.dist ?? Infinity
