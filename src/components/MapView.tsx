@@ -8,7 +8,7 @@ import {
 import type { Vibe } from '../../shared/types'
 import { DEMO_CENTER } from '../../shared/seed-data'
 import { isFriend } from '../../shared/friends'
-import { heatFor } from '../lib/heat'
+import { moodFor, moodGlow } from '../lib/mood'
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 const MAP_ID = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'
@@ -22,32 +22,26 @@ function isFresh(iso: string): boolean {
   return Date.now() - t < FRESH_MS
 }
 
-// Emoji by popping tier — quick read on the map.
-function pinEmoji(score: number): string {
-  if (score >= 80) return '🔥'
-  if (score >= 60) return '🥳'
-  if (score >= 40) return '😎'
-  if (score >= 20) return '😴'
-  return '💀'
-}
-
+// A glowing mood dot. Energy reads as dot size + glow intensity — no number,
+// no emoji (per the design system). Color is the venue's mood.
 function VibePin({ vibe }: { vibe: LatLngVibe }) {
-  const heat = heatFor(vibe.popping_score)
+  const mood = moodFor(vibe)
   const friend = isFriend(vibe.handle)
   const fresh = isFresh(vibe.created_at)
+  const size = 12 + Math.round((vibe.popping_score / 100) * 16)
 
   return (
     <div
       className={`vibe-pin ${fresh ? 'fresh' : ''} ${friend ? 'friend' : ''}`}
       style={{
-        background: heat.color,
-        boxShadow: `0 0 12px ${heat.color}aa, 0 0 4px rgba(0,0,0,0.6)`,
+        ['--mood' as string]: mood.color,
+        width: size,
+        height: size,
+        background: mood.color,
+        boxShadow: friend ? undefined : moodGlow(mood.color, vibe.popping_score),
       }}
-      title={`${vibe.place_name} · ${vibe.popping_score}`}
-    >
-      <span className="vibe-pin-emoji">{pinEmoji(vibe.popping_score)}</span>
-      <span className="vibe-pin-score">{vibe.popping_score}</span>
-    </div>
+      title={`${vibe.place_name} · ${mood.label}`}
+    />
   )
 }
 
@@ -139,8 +133,8 @@ export function MapView({ vibes, center }: { vibes: Vibe[]; center?: { lat: numb
             onCloseClick={() => setOpenId(null)}
             pixelOffset={[0, -28]}
           >
-            <div className="vibe-popup">
-              <strong>{open.place_name}</strong> · {open.popping_score}/100
+            <div className="vibe-popup" style={{ ['--mood' as string]: moodFor(open).color }}>
+              <strong>{open.place_name}</strong> <span className="mood-word">{moodFor(open).label}</span>
               <br />
               {open.summary}
               {open.clip_url && <VibeSample url={open.clip_url} />}

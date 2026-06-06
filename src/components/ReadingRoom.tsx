@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const COPY = ['tuning in…', 'reading the room…', 'asking the bartender…', 'feeling it out…']
+const COPY = ['listening…', 'reading the aura…', 'feeling it out…']
 
 export function ReadingRoom() {
   const [i, setI] = useState(0)

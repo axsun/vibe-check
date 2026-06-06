@@ -8,3 +8,6 @@ tmp
 *.log
 data
 
+
+# Local design references (not part of the app)
+public/sample_designs

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { DiscoverEvent } from '../../shared/types'
 import { discover } from '../lib/api'
-import { heatFor } from '../lib/heat'
+import { moodFor } from '../lib/mood'
 
 /** Plays the first ~5s of an event clip, then auto-stops. */
 function DiscSample({ url }: { url: string }) {
@@ -33,21 +33,21 @@ function DiscSample({ url }: { url: string }) {
 }
 
 function InspectSheet({ ev, onClose }: { ev: DiscoverEvent; onClose: () => void }) {
-  const heat = heatFor(ev.popping_score)
+  const mood = moodFor(ev)
   function takeMeThere() {
     if (ev.lat == null || ev.lng == null) return
     window.open(`https://www.google.com/maps/search/?api=1&query=${ev.lat},${ev.lng}`, '_blank', 'noopener,noreferrer')
   }
   return (
     <div className="inspect-backdrop" onClick={onClose}>
-      <div className="inspect-sheet" style={{ ['--heat' as string]: heat.color }} onClick={(e) => e.stopPropagation()}>
+      <div className="inspect-sheet" style={{ ['--mood' as string]: mood.color }} onClick={(e) => e.stopPropagation()}>
         <button className="inspect-close" onClick={onClose} aria-label="Close">×</button>
         <div className="disc-when">
           <span className={`disc-kind ${ev.kind}`}>{ev.kind === 'now' ? 'NOW' : 'SOON'}</span>
           <span className="disc-time">{ev.when}</span>
         </div>
         <div className="inspect-name t-display-l">{ev.name}</div>
-        <div className="disc-tier t-micro" style={{ color: heat.color }}>{heat.label} · {ev.popping_score}/100</div>
+        <div className="disc-tier t-micro">{mood.label}</div>
         <p className="inspect-summary">"{ev.summary}"</p>
         <div className="emoji-tags">
           {ev.music_genre && <span className="emoji-tag">{ev.music_genre}</span>}
@@ -124,7 +124,7 @@ export function Discover() {
         <span className="discover-icon">✨</span>
         <input
           className="discover-input"
-          placeholder="Find a vibe… “chill jazz tonight”"
+          placeholder="find an aura — “chill jazz tonight”"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -142,17 +142,17 @@ export function Discover() {
       </form>
 
       {error && <p className="discover-error t-small">{error}</p>}
-      {loading && <div className="discover-loading t-small">Reading the city…</div>}
+      {loading && <div className="discover-loading t-small">reading the city…</div>}
 
       {events && events.length > 0 && (
         <div className="discover-carousel">
           {events.map((ev) => {
-            const heat = heatFor(ev.popping_score)
+            const mood = moodFor(ev)
             return (
               <button
                 key={ev.id}
                 className="disc-card"
-                style={{ ['--heat' as string]: heat.color }}
+                style={{ ['--mood' as string]: mood.color }}
                 onClick={() => setSelected(ev)}
               >
                 <div className="disc-when">
@@ -160,7 +160,7 @@ export function Discover() {
                   <span className="disc-time">{ev.when}</span>
                 </div>
                 <div className="disc-name t-h2">{ev.name}</div>
-                <div className="disc-tier t-micro" style={{ color: heat.color }}>{heat.label}</div>
+                <div className="disc-tier t-micro">{mood.label}</div>
                 <p className="disc-summary">{ev.summary}</p>
                 <div className="disc-reason t-small">{ev.match_reason}</div>
               </button>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Vibe } from '../../shared/types'
-import { heatFor } from '../lib/heat'
+import { moodFor } from '../lib/mood'
 import { vibeTags } from '../lib/vibeTags'
 import { freshnessLabel, formatDistance } from '../lib/distance'
 import { friendsAt, isFriend } from '../../shared/friends'
@@ -43,7 +43,7 @@ function SocialFooter({ vibe }: { vibe: Vibe }) {
 
 export function VibeCard({ vibe, distanceKm, onSelect, expanded }: Props) {
   const [open, setOpen] = useState(!!expanded)
-  const heat = heatFor(vibe.popping_score)
+  const mood = moodFor(vibe)
   const tags = vibeTags(vibe)
   const friend = isFriend(vibe.handle) || friendsAt(vibe.place_name).length > 0
 
@@ -62,7 +62,7 @@ export function VibeCard({ vibe, distanceKm, onSelect, expanded }: Props) {
   return (
     <div
       className={`card vibe-card ${friend ? 'is-friend' : ''} ${open ? 'is-open' : ''}`}
-      style={{ ['--heat' as string]: heat.color }}
+      style={{ ['--mood' as string]: mood.color }}
       onClick={toggle}
       role="button"
     >
@@ -81,7 +81,7 @@ export function VibeCard({ vibe, distanceKm, onSelect, expanded }: Props) {
             )}
           </div>
         </div>
-        <span className="vibe-tier t-micro" style={{ color: heat.color }}>{heat.label}</span>
+        <span className="vibe-tier t-micro">{mood.label}</span>
       </div>
 
       <p className="summary">"{vibe.summary}"</p>

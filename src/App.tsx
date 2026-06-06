@@ -29,7 +29,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <h1>Vibe&nbsp;Check</h1>
-        <span className="tagline">is it popping?</span>
+        <span className="tagline">read the aura</span>
       </header>
 
       <main className="content">

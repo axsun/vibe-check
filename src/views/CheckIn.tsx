@@ -9,7 +9,7 @@ import { Orb, type AgentState } from '../components/Orb'
 import { ReadingRoom } from '../components/ReadingRoom'
 import { VibeReveal } from '../components/VibeReveal'
 import { Discover } from '../components/Discover'
-import { heatFor } from '../lib/heat'
+import { MOODS } from '../lib/mood'
 
 const CLIP_SECONDS = 20
 const READING_MS = 1800
@@ -51,12 +51,15 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
       const target = mic.levelRef.current ?? 0
       smoothLevelRef.current += (target - smoothLevelRef.current) * 0.08
       const lvl = smoothLevelRef.current
-      // Map mic RMS (0–1) to a synthetic 0–100 score so heat scale agrees w/ rest of app.
-      const synthScore = Math.min(100, lvl * 220)
-      const heat = heatFor(synthScore)
-      // Tuple: deep base → bright tier color.
-      const baseDark = lvl > 0.3 ? '#3D2BB8' : '#2A1B6B'
-      colorsRef.current = [baseDark, heat.color]
+      // Living mood glow: the louder the room, the hotter the mood color.
+      const moodColor =
+        lvl > 0.45 ? MOODS.party.color
+          : lvl > 0.25 ? MOODS.electric.color
+            : lvl > 0.12 ? MOODS.buzzy.color
+              : MOODS.chill.color
+      // Tuple: deep base → living mood color.
+      const baseDark = lvl > 0.3 ? '#1b1530' : '#120f22'
+      colorsRef.current = [baseDark, moodColor]
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
@@ -214,7 +217,7 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
   return (
     <div className="ci-stage ci-invite">
       <div className="ci-invite-copy">
-        <div className="t-display-l">What's the vibe?</div>
+        <div className="t-display-l">what's the aura?</div>
         {phase === 'listening' && (
           <div className="ci-countdown t-display-l" aria-live="polite">
             {Math.ceil(remaining)}<span className="ci-countdown-unit">s</span>
@@ -238,7 +241,7 @@ export function CheckIn({ onPosted }: { onPosted: (v: Vibe) => void }) {
       </button>
 
       {phase !== 'listening' && (
-        <div className="ci-orb-hint t-small">👆 Tap the orb to record · 20s</div>
+        <div className="ci-orb-hint">tap the orb · read the room · 20s</div>
       )}
 
       {phase !== 'listening' && <Discover />}
