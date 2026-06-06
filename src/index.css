@@ -144,9 +144,24 @@ body {
   box-shadow: inset 0 1px 0 var(--specular), 0 0 28px color-mix(in srgb, var(--mood) 36%, transparent);
 }
 .ss-play:active { transform: scale(0.97); }
+/* "generating your soundscape…" — a soft glass shimmer sweeping under the label */
+.ss-play.generating {
+  cursor: default; color: var(--ink);
+  background-image: linear-gradient(
+    100deg,
+    var(--glass-2) 38%,
+    color-mix(in srgb, var(--mood) 34%, var(--glass-2)) 50%,
+    var(--glass-2) 62%
+  );
+  background-size: 220% 100%;
+  animation: ss-sheen 1.4s linear infinite;
+}
+@keyframes ss-sheen { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .ss-viz { display: flex; align-items: center; gap: 4px; height: 26px; }
 .ss-viz span { width: 3px; height: 5px; border-radius: 2px; background: var(--mood); opacity: 0.5; }
 .ss-viz.on span { animation: ss-bars 900ms ease-in-out infinite; opacity: 1; }
+/* while generating: gentle breathing shimmer instead of full bars */
+.ss-viz.gen span { animation: ss-shimmer 1.4s ease-in-out infinite; }
 @keyframes ss-bars { 0%, 100% { height: 5px; } 50% { height: 24px; } }
 .ss-ss-title { color: var(--mood); }
 .ss-ss-desc { color: var(--muted); text-align: center; }

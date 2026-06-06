@@ -143,10 +143,14 @@ export function Soundscape({ vibes }: { vibes: Vibe[]; center?: { lat: number; l
 
           {/* Hear the forecast — the signature moment */}
           <div className="ss-player">
-            <button className={`ss-play ${playing ? 'on' : ''}`} onClick={toggleSound}>
-              {loadingAudio ? 'tuning…' : playing ? '⏸  playing' : '▶  hear the forecast'}
+            <button
+              className={`ss-play ${playing ? 'on' : ''} ${loadingAudio ? 'generating' : ''}`}
+              onClick={toggleSound}
+              disabled={loadingAudio}
+            >
+              {loadingAudio ? 'generating your soundscape…' : playing ? '⏸  playing' : '▶  hear the forecast'}
             </button>
-            <div className={`ss-viz ${playing ? 'on' : ''}`} aria-hidden="true">
+            <div className={`ss-viz ${playing ? 'on' : ''} ${loadingAudio ? 'gen' : ''}`} aria-hidden="true">
               {Array.from({ length: 9 }).map((_, i) => (
                 <span key={i} style={{ animationDelay: `${i * 80}ms` }} />
               ))}
