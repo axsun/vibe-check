@@ -12,13 +12,14 @@ local-only demo, 2-person team (user = Person B / backend).
 - Frontend: React + Vite (`/src`), proxies `/api` → Express.
 - Backend: Express (`/server`), keys server-side only.
 - Shared contract: `/shared/types.ts` (the API shapes) + `/shared/score.ts` (popping score). Don't fork these.
-- AI: Gemini 2.0 Flash (audio→JSON) in `server/lib/gemini.ts`. ElevenLabs TTS in `server/lib/elevenlabs.ts`.
-- Data: Supabase (Postgres + Storage). `server/lib/store.ts` falls back to an in-memory
-  seeded store when Supabase isn't configured, so the app runs end-to-end with no keys.
+- AI: Gemini 2.5 Flash (audio→JSON) in `server/lib/gemini.ts`. ElevenLabs TTS in `server/lib/elevenlabs.ts`.
+- Data: **local files by default** — `data/vibes.json` + `data/clips/` via `server/lib/localStore.ts`
+  (clips served at `/clips`, proxied through Vite). `server/lib/store.ts` dispatches storage.
+  Supabase is kept fully working behind `STORAGE_MODE=supabase` (one env var to switch back).
 
 ## Graceful degradation (important)
 Every external dep is behind a flag in `server/lib/env.ts`. Missing key = mock, not crash:
-no Gemini → random mock vibe; no Supabase → in-memory store; no ElevenLabs → narrator 503.
+no Gemini → random mock vibe; storage defaults to local files; no ElevenLabs → narrator 503.
 
 ## Conventions / gotchas
 - Build the vertical slice first; timebox stretch (cut by ~1:45pm if MVP isn't solid).

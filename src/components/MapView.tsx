@@ -1,5 +1,10 @@
-import { useMemo } from 'react'
-import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  InfoWindow,
+} from '@vis.gl/react-google-maps'
 import type { Vibe } from '../../shared/types'
 import { DEMO_CENTER } from '../../shared/seed-data'
 import { isFriend } from '../../shared/friends'
@@ -9,17 +14,19 @@ const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined
 const MAP_ID = (import.meta.env.VITE_GOOGLE_MAPS_MAP_ID as string | undefined) || 'DEMO_MAP_ID'
 const FRESH_MS = 10 * 60 * 1000
 
+type LatLngVibe = Vibe & { lat: number; lng: number }
+
 function isFresh(iso: string): boolean {
   const t = Date.parse(iso)
   if (Number.isNaN(t)) return false
   return Date.now() - t < FRESH_MS
 }
 
-function VibePin({ vibe }: { vibe: Vibe }) {
+function VibePin({ vibe }: { vibe: LatLngVibe }) {
   const heat = heatFor(vibe.popping_score)
   const friend = isFriend(vibe.handle)
   const fresh = isFresh(vibe.created_at)
-  const size = 14 + Math.round((vibe.popping_score / 100) * 14) // 14–28px
+  const size = 14 + Math.round((vibe.popping_score / 100) * 14)
 
   return (
     <div
@@ -35,9 +42,48 @@ function VibePin({ vibe }: { vibe: Vibe }) {
   )
 }
 
+/** Plays the first ~5s of a vibe clip, then auto-stops. */
+function VibeSample({ url }: { url: string }) {
+  const ref = useRef<HTMLAudioElement | null>(null)
+  const timer = useRef<number | undefined>(undefined)
+  const [playing, setPlaying] = useState(false)
+
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  function stop() {
+    const a = ref.current
+    if (a) { a.pause(); a.currentTime = 0 }
+    window.clearTimeout(timer.current)
+    setPlaying(false)
+  }
+
+  function toggle() {
+    const a = ref.current
+    if (!a) return
+    if (playing) return stop()
+    a.currentTime = 0
+    void a.play()
+    setPlaying(true)
+    timer.current = window.setTimeout(stop, 5000)
+  }
+
+  return (
+    <div className="vibe-sample">
+      <audio ref={ref} src={url} preload="none" onEnded={stop} />
+      <button className="vibe-sample-btn" onClick={toggle}>
+        {playing ? '⏹ Stop' : '▶ 5s sample'}
+      </button>
+    </div>
+  )
+}
+
 export function MapView({ vibes, center }: { vibes: Vibe[]; center?: { lat: number; lng: number } }) {
   const c = center ?? DEMO_CENTER
-  const pins = useMemo(() => vibes.filter((v) => v.lat != null && v.lng != null), [vibes])
+  const pins = useMemo(
+    () => vibes.filter((v): v is LatLngVibe => v.lat != null && v.lng != null),
+    [vibes],
+  )
+  const [openId, setOpenId] = useState<string | null>(null)
 
   if (!API_KEY) {
     return (
@@ -53,6 +99,8 @@ export function MapView({ vibes, center }: { vibes: Vibe[]; center?: { lat: numb
     )
   }
 
+  const open = pins.find((v) => v.id === openId)
+
   return (
     <APIProvider apiKey={API_KEY}>
       <Map
@@ -66,10 +114,30 @@ export function MapView({ vibes, center }: { vibes: Vibe[]; center?: { lat: numb
         className="map"
       >
         {pins.map((v) => (
-          <AdvancedMarker key={v.id} position={{ lat: v.lat!, lng: v.lng! }}>
+          <AdvancedMarker
+            key={v.id}
+            position={{ lat: v.lat, lng: v.lng }}
+            zIndex={v.popping_score}
+            onClick={() => setOpenId(v.id)}
+          >
             <VibePin vibe={v} />
           </AdvancedMarker>
         ))}
+
+        {open && (
+          <InfoWindow
+            position={{ lat: open.lat, lng: open.lng }}
+            onCloseClick={() => setOpenId(null)}
+            pixelOffset={[0, -28]}
+          >
+            <div className="vibe-popup">
+              <strong>{open.place_name}</strong> · {open.popping_score}/100
+              <br />
+              {open.summary}
+              {open.clip_url && <VibeSample url={open.clip_url} />}
+            </div>
+          </InfoWindow>
+        )}
       </Map>
     </APIProvider>
   )

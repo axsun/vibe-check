@@ -39,13 +39,37 @@ export async function analyzeVibe(clip: Buffer): Promise<VibeDimensions> {
     generationConfig: { responseMimeType: 'application/json', responseSchema: responseSchema as any },
   })
 
-  const result = await model.generateContent([
-    { inlineData: { data: buffer.toString('base64'), mimeType } },
-    { text: prompt },
-  ])
+  const result = await withRetry(() =>
+    model.generateContent([
+      { inlineData: { data: buffer.toString('base64'), mimeType } },
+      { text: prompt },
+    ]),
+  )
 
   const parsed = JSON.parse(result.response.text()) as VibeDimensions
   return normalize(parsed)
+}
+
+/**
+ * Gemini flash returns 503 (overloaded) / 429 (rate limit) under load — common on
+ * a shared free-tier key during a demo. Retry a few times with exponential backoff
+ * so a transient spike doesn't fail the whole capture.
+ */
+async function withRetry<T>(fn: () => Promise<T>, attempts = 4): Promise<T> {
+  let lastErr: any
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn()
+    } catch (err: any) {
+      lastErr = err
+      const transient = /\b(503|429|overloaded|high demand|unavailable)\b/i.test(String(err?.message))
+      if (!transient || i === attempts - 1) throw err
+      const waitMs = 800 * 2 ** i // 0.8s, 1.6s, 3.2s
+      console.warn(`[gemini] ${err.message?.slice(0, 80)} — retry ${i + 1}/${attempts - 1} in ${waitMs}ms`)
+      await new Promise((r) => setTimeout(r, waitMs))
+    }
+  }
+  throw lastErr
 }
 
 function normalize(v: VibeDimensions): VibeDimensions {

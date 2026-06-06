@@ -10,6 +10,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': 'http://localhost:3001',
+      '/clips': 'http://localhost:3001',
     },
   },
 })
