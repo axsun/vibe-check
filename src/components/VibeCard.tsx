@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Vibe } from '../../shared/types'
 import { moodFor } from '../lib/mood'
+import { ClipSample } from './ClipSample'
 import { vibeTags } from '../lib/vibeTags'
 import { freshnessLabel, formatDistance } from '../lib/distance'
 import { friendsAt, isFriend } from '../../shared/friends'
@@ -91,6 +92,8 @@ export function VibeCard({ vibe, distanceKm, onSelect, expanded }: Props) {
           <span key={t.key} className="emoji-tag">{t.label}</span>
         ))}
       </div>
+
+      {vibe.clip_url && <ClipSample url={vibe.clip_url} />}
 
       <SocialFooter vibe={vibe} />
 
