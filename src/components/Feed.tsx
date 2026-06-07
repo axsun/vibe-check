@@ -69,12 +69,12 @@ export function Feed({ vibes, center }: Props) {
     return withDist
   }, [vibes, filter, query, center])
 
-  const FILTERS: { key: Filter; label: string; emoji?: string }[] = [
+  const FILTERS: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
-    { key: 'lively', label: 'Lively', emoji: '⚡' },
-    { key: 'chill', label: 'Chill', emoji: '😌' },
-    { key: 'lyrics', label: 'Lyrics', emoji: '🎤' },
-    { key: 'genre', label: 'Music', emoji: '🎶' },
+    { key: 'lively', label: 'Lively' },
+    { key: 'chill', label: 'Chill' },
+    { key: 'lyrics', label: 'Lyrics' },
+    { key: 'genre', label: 'Music' },
   ]
 
   return (
@@ -101,7 +101,6 @@ export function Feed({ vibes, center }: Props) {
                 className={`pill ${filter === f.key ? 'on' : ''}`}
                 onClick={() => setFilter(f.key)}
               >
-                {f.emoji && <span className="pill-emoji">{f.emoji}</span>}
                 {f.label}
               </button>
             ))}
